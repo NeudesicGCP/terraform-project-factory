@@ -1,0 +1,6 @@
+# Don't commit terraform state files
+.terraform
+terraform.tfstate*
+
+# Don't commit JSON credential files
+*.json
