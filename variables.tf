@@ -14,6 +14,19 @@ generated project_id = "foo-bar-213e2a3c"
 EOF
 }
 
+# Set to true to disable project randomisation - useful when importing existing
+# projects into the module.
+variable "randomise_project_id" {
+  description = <<EOF
+If set to false, the project_id will not contain a random suffix; defaults to
+true. E.g. to import an existing project into terraform workspace using this
+module,
+randomise_project_id = false
+EOF
+
+  default = true
+}
+
 # The project display name to use. This can contain any characters.
 variable "display_name" {
   type = "string"

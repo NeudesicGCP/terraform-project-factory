@@ -27,7 +27,7 @@ resource "google_project" "project" {
   # Project id has to be 30 characters or less; set the format string to
   # truncate display name part by setting string precision as 29 - number of he
   # chars in random portion.
-  project_id = "${format("%.[1]*s-%s", 29 - length(random_id.project.hex), var.project_id, random_id.project.hex)}"
+  project_id = "${var.randomise_project_id ? format("%.[1]*s-%s", 29 - length(random_id.project.hex), var.project_id, random_id.project.hex) : var.project_id}"
 
   org_id          = "${var.folder_id != "" ? "" : data.google_organization.org.id}"
   folder_id       = "${var.folder_id}"
