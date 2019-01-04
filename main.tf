@@ -51,10 +51,10 @@ resource "google_project_service" "api" {
   project = "${google_project.project.project_id}"
   service = "${element(var.enable_apis, count.index)}"
 
-  # If this is enabled, removing an entry from the enabled_apis list will cause
-  # it to be disabled on the next apply. This is the correct option in our
-  # opinion.
-  disable_on_destroy = true
+  # Do not disable APIs when they are changed or destroyed; this prevents a
+  # race condition between Compute API and network destruction, for example,
+  # when issuing a `terraform destroy`.
+  disable_on_destroy = false
 }
 
 # Create a bucket for usage export if one has not been explicitly provided
