@@ -13,7 +13,7 @@ resource "null_resource" "delete_default_service_account" {
 
   triggers {
     default_service_account = "${data.google_compute_default_service_account.default.id}"
-    activated_apis          = "${join(",", var.enable_apis)}y"
+    activated_apis          = "${join(",", var.enable_apis)}"
   }
 
   depends_on = ["google_project_service.api", "data.google_compute_default_service_account.default"]
