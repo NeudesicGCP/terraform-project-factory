@@ -60,6 +60,7 @@ data "null_data_source" "service_account_subnets" {
 # can bind to just those subnets.
 resource "google_compute_subnetwork_iam_member" "subnets" {
   count      = "${length(var.service_account_subnets)}"
+  provider   = "google-beta"
   region     = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "region")}"
   subnetwork = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "subnet")}"
   project    = "${local.service_account_network_project}"
