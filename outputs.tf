@@ -4,9 +4,9 @@ output "project_id" {
   value = "${google_project.project.project_id}"
 }
 
-# Export the subnets as a map of name to region
-output "subnets" {
-  value = "${zipmap(google_compute_subnetwork.subnet.*.name, google_compute_subnetwork.subnet.*.region)}"
+# Export the project number so it can be used elsewhere
+output "project_number" {
+  value = "${google_project.project.number}"
 }
 
 # Export the service accounts as a map of account id to fully-qualified email
