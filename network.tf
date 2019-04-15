@@ -31,5 +31,5 @@ resource "google_project_iam_member" "network-users" {
   count   = "${var.shared_vpc_host_project_id != "" ? length(var.network_users) : 0}"
   project = "${var.shared_vpc_host_project_id}"
   role    = "roles/compute.networkUser"
-  member  = "${element(var.network_admins, count.index)}"
+  member  = "${element(var.network_users, count.index)}"
 }
