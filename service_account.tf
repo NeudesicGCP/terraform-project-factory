@@ -32,6 +32,9 @@ locals {
   # granted access in the host project, but fallback to the project created in
   # this module instance if a host project is unspecified.
   service_account_network_project = "${var.shared_vpc_host_project_id != "" ? var.shared_vpc_host_project_id : google_project.project.project_id}"
+
+  # Be prepared for an empty service_account_subnets list
+  service_account_subnets = ["${coalescelist(var.service_account_subnets, list("invalid:invalid:invalid"))}"]
 }
 
 # Add the service accounts to the networks defined in project, since the list
@@ -43,15 +46,34 @@ resource "google_project_iam_member" "network_all" {
   member  = "serviceAccount:${element(google_service_account.sa.*.email, count.index)}"
 }
 
+# Verify that service_account_subnets_count matches the number of entries in
+# service_account_subnets - workaround for Terraform limitation.
+# See https://github.com/hashicorp/terraform/issues/10857#issuecomment-368059147
+resource "null_resource" "verify_service_account_subnets_count" {
+  provisioner "local-exec" {
+    command = <<EOF
+if [ ${var.service_account_subnets_count} -ne ${length(var.service_account_subnets)} ]; then
+  echo "var.service_account_subnets_count must match the length of var.service_account_subnets list"
+  exit 1
+fi
+EOF
+  }
+
+  triggers {
+    service_account_subnets_computed = "${length(var.service_account_subnets)}"
+    service_account_subnets_provided = "${var.service_account_subnets_count}"
+  }
+}
+
 # Sanitise the service account:subnet list; all raw service account ids will
 # become fully-qualified identifiers.
 data "null_data_source" "service_account_subnets" {
-  count = "${length(var.service_account_subnets)}"
+  count = "${var.service_account_subnets_count}"
 
   inputs = {
-    account = "${replace(element(var.service_account_subnets, count.index), "@", "!") != element(var.service_account_subnets, count.index) ? format("serviceAccount:%s", element(split(":", element(var.service_account_subnets, count.index)), 0)) : format("serviceAccount:%s",join("", matchkeys(google_service_account.sa.*.email, google_service_account.sa.*.account_id, list(element(split(":", element(var.service_account_subnets, count.index)), 0)))))}"
-    region  = "${element(split(":", element(var.service_account_subnets, count.index)), 1)}"
-    subnet  = "${element(split(":", element(var.service_account_subnets, count.index)), 2)}"
+    account = "${replace(element(local.service_account_subnets, count.index), "@", "!") != element(local.service_account_subnets, count.index) ? format("serviceAccount:%s", element(split(":", element(local.service_account_subnets, count.index)), 0)) : format("serviceAccount:%s",join("", matchkeys(google_service_account.sa.*.email, google_service_account.sa.*.account_id, list(element(split(":", element(local.service_account_subnets, count.index)), 0)))))}"
+    region  = "${element(split(":", element(local.service_account_subnets, count.index)), 1)}"
+    subnet  = "${element(split(":", element(local.service_account_subnets, count.index)), 2)}"
   }
 }
 
@@ -59,7 +81,7 @@ data "null_data_source" "service_account_subnets" {
 # account should be granted access, add permissions so that the service account
 # can bind to just those subnets.
 resource "google_compute_subnetwork_iam_member" "subnets" {
-  count      = "${length(var.service_account_subnets)}"
+  count      = "${var.service_account_subnets_count}"
   provider   = "google-beta"
   region     = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "region")}"
   subnetwork = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "subnet")}"
