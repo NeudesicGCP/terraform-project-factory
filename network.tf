@@ -20,12 +20,13 @@ resource "google_compute_network" "net" {
 
 # Create the subnets for the project
 resource "google_compute_subnetwork" "subnet" {
-  count         = "${var.shared_vpc_host_project_id != "" ? 0 : length(var.subnets)}"
-  project       = "${google_project.project.project_id}"
-  name          = "${length(split(":", element(local.subnets, count.index))) > 3 ? element(split(":", element(local.subnets, count.index)), 3) : format("%s-%s", element(split(":", element(local.subnets, count.index)), 0), element(split(":", element(local.subnets, count.index)), 0))}"
-  ip_cidr_range = "${element(split(":", element(local.subnets, count.index)), 2)}"
-  region        = "${element(split(":", element(local.subnets, count.index)), 1)}"
-  network       = "${element(split(":", element(local.subnets, count.index)), 0)}"
+  count                    = "${var.shared_vpc_host_project_id != "" ? 0 : length(var.subnets)}"
+  project                  = "${google_project.project.project_id}"
+  name                     = "${length(split(":", element(local.subnets, count.index))) > 3 ? element(split(":", element(local.subnets, count.index)), 3) : format("%s-%s", element(split(":", element(local.subnets, count.index)), 0), element(split(":", element(local.subnets, count.index)), 0))}"
+  ip_cidr_range            = "${element(split(":", element(local.subnets, count.index)), 2)}"
+  region                   = "${element(split(":", element(local.subnets, count.index)), 1)}"
+  network                  = "${element(split(":", element(local.subnets, count.index)), 0)}"
+  private_ip_google_access = "${length(split(":", element(local.subnets, count.index))) > 4 ? element(split(":", element(local.subnets, count.index)), 4) : "false"}"
 
   depends_on = ["google_compute_network.net"]
 }

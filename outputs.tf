@@ -18,3 +18,13 @@ output "service_accounts" {
 output "usage_export_bucket" {
   value = "${local.usage_export_bucket_name}"
 }
+
+# Export the networks as a map of names to self_links
+output "networks" {
+  value = "${zipmap(google_compute_network.net.*.name, google_compute_network.net.*.self_link)}"
+}
+
+# Export the subnets as a map of names to self_links
+output "subnets" {
+  value = "${zipmap(google_compute_subnetwork.subnet.*.name, google_compute_subnetwork.subnet.*.self_link)}"
+}
