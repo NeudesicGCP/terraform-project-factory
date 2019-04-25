@@ -32,6 +32,7 @@ resource "google_project" "project" {
   org_id          = "${var.folder_id != "" ? "" : data.google_organization.org.id}"
   folder_id       = "${var.folder_id}"
   billing_account = "${data.google_billing_account.billing.id}"
+  labels          = "${var.labels}"
 
   # If false (the default), delete the default network after creation.
   # Note that a network must be created elsewhere for this project to be
@@ -64,6 +65,7 @@ resource "google_storage_bucket" "usage" {
   name          = "${google_project.project.project_id}"
   storage_class = "MULTI_REGIONAL"
   location      = "${var.usage_export_bucket_location}"
+  labels        = "${merge(var.labels, map("bucket_purpose", "usage-export"))}"
 
   versioning = {
     enabled = "true"
