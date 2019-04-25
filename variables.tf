@@ -326,3 +326,18 @@ EOF
 
   default = ""
 }
+
+variable "labels" {
+  type    = "map"
+  default = {}
+
+  description = <<EOF
+A map of key-value pairs to attach as labels to all resources that accept them. Default is an empty set.
+
+E.g. to label all resources with 'customer' value,
+
+labels = {
+  "customer" = "name"
+}
+EOF
+}
