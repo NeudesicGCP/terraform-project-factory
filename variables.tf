@@ -201,6 +201,18 @@ EOF
   default = []
 }
 
+variable "service_account_subnets_count" {
+  default = 0
+
+  description = <<EOF
+When passing a list of service account:subnets as part of a shared VPC, you must explicitly set the number of entries in the list to work around a Terraform limitation.
+
+E.g.
+service_account_subnets = ["foobar@example.com:us-west1:bar"]
+service_account_subnets_count = 1
+EOF
+}
+
 variable "iam_assignments" {
   type = "list"
 
