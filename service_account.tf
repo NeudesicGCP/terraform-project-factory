@@ -90,3 +90,18 @@ resource "google_compute_subnetwork_iam_member" "subnets" {
   member     = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "account")}"
   depends_on = ["google_compute_network.net", "google_compute_subnetwork.subnet"]
 }
+
+# This will create *DUPLICATE* resources even though the role will be applied
+# once per subnet/region, but we can live with that to make sure that the
+# Google APIs Service Agent is added to each subnet that may need it when the
+# project is a shared VPC service project.
+resource "google_compute_subnetwork_iam_member" "api" {
+  count      = "${var.shared_vpc_host_project_id != "" ? var.service_account_subnets_count : 0}"
+  provider   = "google-beta"
+  region     = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "region")}"
+  subnetwork = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "subnet")}"
+  project    = "${local.service_account_network_project}"
+  role       = "roles/compute.networkUser"
+  member     = "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com"
+  depends_on = ["google_compute_network.net", "google_compute_subnetwork.subnet"]
+}
