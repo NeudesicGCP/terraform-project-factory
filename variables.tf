@@ -232,6 +232,18 @@ EOF
   default = []
 }
 
+variable "iam_assignments_count" {
+  default = 0
+
+  description = <<EOF
+When passing a list of account:roles as `iam_assignments`, you must explicitly set the number of entries in the list to work around a Terraform limitation.
+
+E.g.
+iam_assignments = ["user:foobar@example.com=roles/editor"]
+iam_assignments_count = 1
+EOF
+}
+
 # A list of APIs to enable on the project
 variable "enable_apis" {
   type = "list"
