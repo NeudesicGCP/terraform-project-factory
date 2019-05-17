@@ -88,7 +88,13 @@ resource "google_compute_subnetwork_iam_member" "subnets" {
   project    = "${local.service_account_network_project}"
   role       = "roles/compute.networkUser"
   member     = "${lookup(data.null_data_source.service_account_subnets.*.outputs[count.index], "account")}"
-  depends_on = ["google_compute_network.net", "google_compute_subnetwork.subnet"]
+
+  depends_on = [
+    "google_compute_network.net",
+    "google_compute_subnetwork.subnet",
+    "google_compute_shared_vpc_host_project.host",
+    "google_compute_shared_vpc_service_project.service_project",
+  ]
 }
 
 # This will create *DUPLICATE* resources even though the role will be applied
@@ -103,5 +109,11 @@ resource "google_compute_subnetwork_iam_member" "api" {
   project    = "${local.service_account_network_project}"
   role       = "roles/compute.networkUser"
   member     = "serviceAccount:${google_project.project.number}@cloudservices.gserviceaccount.com"
-  depends_on = ["google_compute_network.net", "google_compute_subnetwork.subnet"]
+
+  depends_on = [
+    "google_compute_network.net",
+    "google_compute_subnetwork.subnet",
+    "google_compute_shared_vpc_host_project.host",
+    "google_compute_shared_vpc_service_project.service_project",
+  ]
 }
